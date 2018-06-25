@@ -113,7 +113,7 @@ impl<'a, N: Notify + 'a> input::ActionContext for ActionContext<'a, N> {
         self.terminal.pixels_to_coords(self.mouse.x as usize, self.mouse.y as usize)
     }
 
-    fn change_font_size(&mut self, delta: i8) {
+    fn change_font_size(&mut self, delta: f32) {
         self.terminal.change_font_size(delta);
     }
 
@@ -308,9 +308,11 @@ impl<N: Notify> Processor<N> {
                         processor.received_char(c);
                     },
                     MouseInput { state, button, modifiers, .. } => {
-                        *hide_cursor = false;
-                        processor.mouse_input(state, button, modifiers);
-                        processor.ctx.terminal.dirty = true;
+                        if *window_is_focused {
+                            *hide_cursor = false;
+                            processor.mouse_input(state, button, modifiers);
+                            processor.ctx.terminal.dirty = true;
+                        }
                     },
                     CursorMoved { position: (x, y), modifiers, .. } => {
                         let x = limit(x as i32, 0, processor.ctx.size_info.width as i32);
